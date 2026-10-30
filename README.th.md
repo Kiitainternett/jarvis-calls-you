@@ -34,3 +34,4 @@
 ## แก้ปัญหา
 - รัน `python -m callme check` เพื่อดูว่าขาดอะไร
 - สายติดแต่ AI ไม่พูดเลย แล้ววางสายเอง: คีย์ Gemini โควต้าหมดหรือคีย์ผิด หลังวางสาย บัญชี AI จะส่งข้อความบอกสาเหตุมาให้ ให้เช็กการใช้งานใน Google AI Studio หรือใส่ `GEMINI_API_KEY_BACKUP` (คีย์จากอีกโปรเจกต์) ระบบจะสลับไปใช้ให้อัตโนมัติ
+- ขึ้น `gemini session reset: 1011 ... exceeded your current quota` ตั้งแต่เริ่มสาย อาจเป็นการเตือนผิด: บางคีย์ทูล Google Search ทำให้เซสชัน Live เปิดไม่ขึ้น `callme` จะลองใหม่โดยไม่มี Google Search ให้เอง 1 ครั้ง (ดูบรรทัด `retrying without the google_search tool` ใน `data/callme.log`) สายจะไปต่อได้ แค่ค้นเว็บสดไม่ได้

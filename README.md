@@ -12,10 +12,6 @@
 
 Free to run: Telegram calls cost nothing and Gemini has a free tier. Everything runs on your own computer.
 
-> [Demo video here]
->
-> ☎️ **Try it now:** call our demo AI on Telegram: **@DEMO_USERNAME** (3-minute calls, it can't do tasks, it just talks).
-
 ## How it works
 
 ```
@@ -96,6 +92,6 @@ Edit `persona.md`. Voice, language, quiet hours, call limits: `.env`.
 - `python -m callme check` shows what is missing.
 - Silence on the call: the first call records greetings in the background; the next call greets instantly. Logs in `data/callme.log`, transcripts in `data/transcripts.txt`.
 - Call connects but the AI never speaks, then hangs up: your Gemini key is out of quota or invalid. The AI account messages you the reason after the call. Check usage in [Google AI Studio](https://aistudio.google.com), or add `GEMINI_API_KEY_BACKUP` (a key from another Google project) and it switches over automatically.
-
+- `gemini session reset: 1011 ... exceeded your current quota` right at the start of a call can be a false alarm: on some keys the Google Search tool makes the Live session refuse to open. `callme` then retries once without Google Search (look for `retrying without the google_search tool` in `data/callme.log`); the call goes on, just without live web search.
 ## License
 MIT
