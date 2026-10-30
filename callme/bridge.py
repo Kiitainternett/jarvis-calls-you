@@ -275,6 +275,13 @@ class CallBridge:
                                     raise ConnectionError("Gemini GoAway")
                                 tc = getattr(resp, "tool_call", None)
                                 if tc and getattr(tc, "function_calls", None):
+                                    # Found in a real call 2026-10-31: hang_up_call arrives before turn_complete and ends the
+                                    # call, so what the caller had just said was never logged (looked like a silent caller).
+                                    if in_text.strip():
+                                        self._line(self.s.owner_name, in_text.strip())
+                                    if out_text.strip():
+                                        self._line(self.s.assistant_name, out_text.strip())
+                                    in_text = out_text = ""
                                     out = []
                                     for fc in tc.function_calls:
                                         args = dict(fc.args or {})
