@@ -76,6 +76,11 @@ def _transcript_path(s: Settings) -> Path:
 
 
 class CallBridge:
+    # Found in a real test call 2026-10-31: with the google_search tool attached, some keys/tiers get
+    # "1011 ... exceeded your current quota" during the Live handshake (the session never opens) while the very same
+    # key talks fine without it. The message reads like a dead key but isn't, so we drop the tool and retry first.
+    use_search = True
+
     def __init__(self, calls, user_id: int, settings: Settings, reason: str, incoming: bool = False,
                  on_callback=None, public: bool = False, caller_name: str = ""):
         self.calls, self.user_id, self.s = calls, user_id, settings
@@ -133,7 +138,7 @@ class CallBridge:
             "response_modalities": ["AUDIO"],
             "speech_config": {"voice_config": {"prebuilt_voice_config": {"voice_name": s.voice}}},
             "system_instruction": sys_prompt,
-            "tools": [{"google_search": {}}, {"function_declarations": decls}],
+            "tools": ([{"google_search": {}}] if self.use_search else []) + [{"function_declarations": decls}],
             "input_audio_transcription": {},
             "output_audio_transcription": {},
             "session_resumption": {"handle": handle} if handle else {},
@@ -332,6 +337,12 @@ class CallBridge:
                 logging.warning("gemini session reset: %s", e)
                 fatal = brain_error(e)
                 failures += 1
+                if fatal and self.use_search and not opened:
+                    # session never opened: suspect the search tool before blaming the key (see use_search)
+                    self.use_search = False
+                    logging.warning("retrying without the google_search tool (%s)", fatal)
+                    handle = None
+                    continue
                 if fatal and len(keys) > 1:
                     keys.pop(0)
                     logging.warning("switching to GEMINI_API_KEY_BACKUP (%s)", fatal)

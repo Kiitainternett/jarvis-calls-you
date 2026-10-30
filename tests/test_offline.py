@@ -123,6 +123,22 @@ def test_public_mode_limits_and_tools(tmp_path):
     assert svc.q.calls_today(datetime.now()) == 0  # public calls do not eat the owner's daily limit
 
 
+def test_live_config_without_search_tool(tmp_path):
+    """Real bug 2026-10-31: google_search made the Live handshake fail with a fake 'quota' 1011; we retry without it."""
+    from google.genai import types
+
+    from callme.bridge import CallBridge
+
+    s = config.Settings(gemini_api_key="x", tg_api_id=1, tg_api_hash="x", owner="1", data_dir=tmp_path)
+    b = CallBridge(None, 1, s, "t")
+    assert any("google_search" in t for t in b.live_config(None)["tools"])
+    b.use_search = False
+    cfg = b.live_config(None)
+    assert not any("google_search" in t for t in cfg["tools"]) and cfg["tools"][0]["function_declarations"]
+    types.LiveConnectConfig(**cfg)
+    assert CallBridge.use_search is True  # the switch is per-call, not global
+
+
 def test_brain_error_classification():
     from callme.bridge import brain_error
     assert "quota" in brain_error(Exception("1011 You exceeded your current quota, please check your plan"))
