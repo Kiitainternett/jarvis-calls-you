@@ -28,7 +28,7 @@ The AI uses its **own** Telegram account (a spare number) and calls **you**. It 
 You need: Python 3.10+, a spare Telegram account for the AI, a free [Gemini API key](https://aistudio.google.com/apikey), and a free Telegram API id/hash from [my.telegram.org](https://my.telegram.org) (log in with the AI's number → API development tools).
 
 ```bash
-git clone https://github.com/Reonipapayoung/jarvis-calls-you && cd jarvis-calls-you
+git clone https://github.com/Kiitainternett/jarvis-calls-you && cd jarvis-calls-you
 ./install.sh            # Windows: install.bat
 nano .env               # fill GEMINI_API_KEY, TG_API_ID, TG_API_HASH, OWNER (your @username)
 python -m callme login  # one time: log in the AI's Telegram account
