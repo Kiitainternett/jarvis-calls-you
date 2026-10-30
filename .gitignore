@@ -1,0 +1,6 @@
+.env
+data/
+schedule.json
+__pycache__/
+*.session
+*.session-journal

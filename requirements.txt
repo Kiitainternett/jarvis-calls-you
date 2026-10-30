@@ -1,0 +1,7 @@
+telethon>=1.36
+py-tgcalls>=3.0.0
+google-genai>=1.40
+audioop-lts; python_version >= "3.13"
+# optional: lets the AI see your camera / screen share during a call
+opencv-python-headless
+numpy

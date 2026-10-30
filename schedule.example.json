@@ -1,0 +1,4 @@
+[
+  {"time": "07:00", "days": "mon-fri", "reason": "Wake me up. Tell me the weather and one good news story."},
+  {"time": "21:30", "days": "daily", "reason": "Evening check-in: ask what I finished today and what is first tomorrow."}
+]
