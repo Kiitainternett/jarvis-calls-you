@@ -58,6 +58,7 @@ class Settings:
     webhook_port: int = 8787
     webhook_token: str = ""
     camera: bool = True
+    gemini_backup_key: str = ""  # used automatically if the main key runs out of quota
     public_mode: bool = False  # strangers may call the AI (demo line), with strict limits
     public_max_minutes: int = 3
     public_calls_per_caller: int = 2
@@ -114,6 +115,7 @@ def load(require_keys: bool = True) -> Settings:
         webhook_port=int(env("WEBHOOK_PORT", "8787")),
         webhook_token=env("WEBHOOK_TOKEN", ""),
         camera=env("CAMERA", "on").lower() not in ("0", "off", "false", "no"),
+        gemini_backup_key=env("GEMINI_API_KEY_BACKUP", ""),
         public_mode=env("PUBLIC_MODE", "off").lower() in ("1", "on", "true", "yes"),
         public_max_minutes=int(env("PUBLIC_MAX_MINUTES", "3")),
         public_calls_per_caller=int(env("PUBLIC_CALLS_PER_CALLER", "2")),

@@ -121,3 +121,10 @@ def test_public_mode_limits_and_tools(tmp_path):
     svc.q.log({"at": datetime.now().isoformat(), "public": True, "caller": 7, "result": "connected"})
     assert not svc.public_allowed(8)  # daily total reached
     assert svc.q.calls_today(datetime.now()) == 0  # public calls do not eat the owner's daily limit
+
+
+def test_brain_error_classification():
+    from callme.bridge import brain_error
+    assert "quota" in brain_error(Exception("1011 You exceeded your current quota, please check your plan"))
+    assert "key" in brain_error(Exception("API key not valid. Please pass a valid API key."))
+    assert brain_error(Exception("1006 connection closed abnormally")) == ""

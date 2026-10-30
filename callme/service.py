@@ -261,6 +261,8 @@ class Service:
     async def after_call(self, reason: str, r: dict) -> None:
         self.q.log({"at": datetime.now().isoformat(timespec="seconds"), "reason": reason,
                     **{k: v for k, v in r.items() if k != "lines"}})
+        if r.get("brain_error"):
+            await self.send_owner(f"⚠️ Call ended early: {r['brain_error']}")
         if r.get("result") != "connected":
             return
         head = f"🌐 {reason}\n" if r.get("public") else ""

@@ -5,3 +5,4 @@ audioop-lts; python_version >= "3.13"
 # optional: lets the AI see your camera / screen share during a call
 opencv-python-headless
 numpy
+cryptg            # optional: faster Telegram encryption

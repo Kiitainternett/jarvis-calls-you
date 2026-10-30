@@ -96,6 +96,7 @@ class CallBridge:
         self.frames_in = self.frames_out = self.in_peak = self.video_frames = self.video_sent = 0
         self.latest_video = None
         self.dead_audio = False
+        self.brain_error = ""
         self.notes: list[str] = []
         self.lines: list[str] = []
         self.tools_used: list[str] = []
@@ -229,8 +230,9 @@ class CallBridge:
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=self.s.gemini_api_key, http_options=types.HttpOptions(api_version="v1alpha"))
-        handle, opened = None, False
+        keys = [k for k in (self.s.gemini_api_key, self.s.gemini_backup_key) if k]
+        client = genai.Client(api_key=keys[0], http_options=types.HttpOptions(api_version="v1alpha"))
+        handle, opened, failures = None, False, 0
         while not self.ended.is_set():
             try:
                 async with client.aio.live.connect(model=self.s.live_model, config=self.live_config(handle)) as session:
@@ -248,6 +250,7 @@ class CallBridge:
                             await session.send_client_content(turns=types.Content(
                                 role="user", parts=[types.Part.from_text(text=self.opening())]), turn_complete=True)
                     self._session = session
+                    failures = 0
 
                     async def to_gemini():
                         while True:
@@ -327,7 +330,21 @@ class CallBridge:
                 if self.ended.is_set():
                     break
                 logging.warning("gemini session reset: %s", e)
-                await asyncio.sleep(1)
+                fatal = brain_error(e)
+                failures += 1
+                if fatal and len(keys) > 1:
+                    keys.pop(0)
+                    logging.warning("switching to GEMINI_API_KEY_BACKUP (%s)", fatal)
+                    client = genai.Client(api_key=keys[0], http_options=types.HttpOptions(api_version="v1alpha"))
+                    handle = None
+                    continue
+                if fatal or failures >= 6:
+                    # retrying a dead key only leaves the caller listening to silence: end the call and say why
+                    self.brain_error = fatal or f"AI keeps disconnecting: {str(e)[:160]}"
+                    logging.error("giving up on this call: %s", self.brain_error)
+                    self.ended.set()
+                    return
+                await asyncio.sleep(min(5, failures))
 
     # ---------------------------------------------------------------- greeting flow
     async def _play(self, pcm: bytes | None) -> None:
@@ -409,11 +426,23 @@ class CallBridge:
             except Exception:  # noqa: BLE001 — the other side already hung up
                 pass
         return {"seconds": round(time.monotonic() - started), "tools": self.tools_used, "lines": self.lines,
-                "notes": self.notes, "dead_audio": self.dead_audio, "heard_caller": self.frames_in > 0,
+                "notes": self.notes, "dead_audio": self.dead_audio, "brain_error": self.brain_error, "heard_caller": self.frames_in > 0,
                 "saw_camera": self.video_sent > 0}
 
 
 # ---------------------------------------------------------------- pre-recorded greeting (instant hello on pick-up)
+def brain_error(e: Exception) -> str:
+    """A Gemini error that will not fix itself by reconnecting → short human reason, else ''."""
+    t = str(e).lower()
+    if "quota" in t or "resource_exhausted" in t or "billing" in t:
+        return "Gemini quota exceeded for this API key (check usage/billing in Google AI Studio, or set GEMINI_API_KEY_BACKUP)"
+    if "api key not valid" in t or "api_key_invalid" in t or "permission" in t or "unauthenticated" in t:
+        return "Gemini rejected the API key (check GEMINI_API_KEY)"
+    if "not found" in t and "model" in t:
+        return "Live model not available for this key (check LIVE_MODEL)"
+    return ""
+
+
 def greeting_texts(s: Settings, incoming: bool, public: bool = False) -> dict:
     g = GREETINGS.get(s.language, GREETINGS["en"])
     fmt = lambda t: t.format(owner=s.owner_name, ai=s.assistant_name)  # noqa: E731
