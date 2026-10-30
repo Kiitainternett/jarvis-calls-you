@@ -144,3 +144,20 @@ def test_brain_error_classification():
     assert "quota" in brain_error(Exception("1011 You exceeded your current quota, please check your plan"))
     assert "key" in brain_error(Exception("API key not valid. Please pass a valid API key."))
     assert brain_error(Exception("1006 connection closed abnormally")) == ""
+
+
+def test_no_hang_up_before_caller_speaks(tmp_path, monkeypatch):
+    import asyncio
+    from callme import bridge
+    monkeypatch.setenv("CALLME_HOME", str(tmp_path))
+    s = config.Settings(gemini_api_key="x", tg_api_id=1, tg_api_hash="x", owner="1", data_dir=tmp_path)
+    b = bridge.CallBridge(None, 1, s, "test")
+
+    async def go():
+        r1 = await b.run_tool("hang_up_call", {})
+        r2 = await b.run_tool("hang_up_call", {})
+        b.caller_turns = 1
+        r3 = await b.run_tool("hang_up_call", {})
+        return r1, r2, r3
+    r1, r2, r3 = asyncio.run(go())
+    assert "not" in r1.lower() and "not" in r2.lower() and r3 == "Hanging up."

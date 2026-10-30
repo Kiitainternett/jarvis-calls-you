@@ -49,6 +49,7 @@ CALL_RULES = """
 - If {owner} says "wait" or goes quiet, stay quiet. Do not talk over them.
 - Before hanging up, repeat back anything {owner} asked you to do in one sentence.
 - When {owner} says goodbye or asks you to hang up: say a short goodbye, then call hang_up_call.
+  Never hang up on your own before {owner} has replied, even if the reason for the call says to keep it short.
 - If a camera image arrives, {owner} turned on their camera or shared their screen. Answer about it only if asked.
 - Use take_note for anything to remember, schedule_callback for "call me later", Google Search for live facts.
 """
@@ -102,6 +103,8 @@ class CallBridge:
         self.latest_video = None
         self.dead_audio = False
         self.brain_error = ""
+        self.caller_turns = 0  # transcribed things the other side said
+        self._early_hangups = 0
         self.notes: list[str] = []
         self.lines: list[str] = []
         self.tools_used: list[str] = []
@@ -216,6 +219,12 @@ class CallBridge:
             logging.warning("public call blocked tool %s", name)
             return "Not available on this line."
         if name == "hang_up_call":
+            # real test call: the model hung up ~5 s in, before the other side said a word. Refuse twice, then obey.
+            if self.caller_turns == 0 and self._early_hangups < 2:
+                self._early_hangups += 1
+                logging.info("refused early hang_up_call (nobody has answered yet)")
+                return ("Do not hang up yet: the other person has not said anything. Wait for their reply and talk "
+                        "with them; hang up only after they say goodbye or ask you to.")
             asyncio.ensure_future(self._hang_up_after_speech())
             return "Hanging up."
         if name == "take_note":
@@ -308,6 +317,7 @@ class CallBridge:
                                     if getattr(sc, "turn_complete", False):
                                         if in_text.strip():
                                             self._line(self.s.owner_name, in_text.strip())
+                                            self.caller_turns += 1
                                         if out_text.strip():
                                             self._line(self.s.assistant_name, out_text.strip())
                                         in_text = out_text = ""
