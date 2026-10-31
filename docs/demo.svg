@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 420" width="1100" height="420" xml:space="preserve" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
+<style>
+.t{font-size:15px;fill:#cfe9ef;opacity:0} .p{fill:#5ef2ff} .d{fill:#5d8a94} .ok{fill:#7dffa8} .a{fill:#5ef2ff;font-weight:700} .u{fill:#ffb547;font-weight:700}
+.bar{fill:#5ef2ff;transform-origin:center;transform-box:fill-box}
+@keyframes l0{0%,2.50%{opacity:0;transform:translateY(6px)}4.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l1{0%,8.75%{opacity:0;transform:translateY(6px)}10.25%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l2{0%,12.50%{opacity:0;transform:translateY(6px)}14.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l3{0%,22.50%{opacity:0;transform:translateY(6px)}24.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l4{0%,27.50%{opacity:0;transform:translateY(6px)}29.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l5{0%,38.75%{opacity:0;transform:translateY(6px)}40.25%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l6{0%,45.00%{opacity:0;transform:translateY(6px)}46.50%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l7{0%,60.00%{opacity:0;transform:translateY(6px)}61.50%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l8{0%,67.50%{opacity:0;transform:translateY(6px)}69.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l9{0%,72.50%{opacity:0;transform:translateY(6px)}74.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes l10{0%,77.50%{opacity:0;transform:translateY(6px)}79.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes ring{0%,12.50%{opacity:0}14.00%,22.50%{opacity:1}24.00%,100%{opacity:0}}@keyframes live{0%,22.50%{opacity:0}24.00%,77.50%{opacity:1}79.00%,100%{opacity:0}}@keyframes end{0%,77.50%{opacity:0;transform:translateY(6px)}79.00%,96%{opacity:1;transform:none}100%{opacity:0}}@keyframes pulse{0%{r:34;opacity:.6}100%{r:70;opacity:0}}@keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+</style>
+<rect width="1100" height="420" rx="18" fill="#05141a"/>
+<rect x="16" y="16" width="770" height="388" rx="12" fill="#081f27" stroke="#14404c"/>
+<circle cx="40" cy="40" r="6" fill="#ff5f57"/><circle cx="60" cy="40" r="6" fill="#febc2e"/><circle cx="80" cy="40" r="6" fill="#28c840"/>
+<text x="110" y="45" font-size="13" fill="#5d8a94">jarvis-calls-you — terminal</text>
+<text x="36" y="92" class="t" style="animation:l0 16.0s infinite"><tspan class="p">$</tspan> python -m callme call "CI failed on main. Tell me and offer to note it."</text><text x="36" y="122" class="t" style="animation:l1 16.0s infinite"><tspan class="d">[callme]</tspan> brain   gemini-live   <tspan class="ok">ready</tspan></text><text x="36" y="146" class="t" style="animation:l2 16.0s infinite"><tspan class="d">[callme]</tspan> dialing owner on Telegram ...</text><text x="36" y="170" class="t" style="animation:l3 16.0s infinite"><tspan class="d">[callme]</tspan> <tspan class="ok">connected</tspan>  48 kHz  two-way audio</text><text x="36" y="200" class="t" style="animation:l4 16.0s infinite"><tspan class="a">AI   </tspan> Sir, the build on main just failed at the test step.</text><text x="36" y="224" class="t" style="animation:l5 16.0s infinite"><tspan class="u">YOU  </tspan> Which test?</text><text x="36" y="248" class="t" style="animation:l6 16.0s infinite"><tspan class="a">AI   </tspan> test_offline, the greeting cache check. Want a note for tomorrow?</text><text x="36" y="272" class="t" style="animation:l7 16.0s infinite"><tspan class="u">YOU  </tspan> Yes, note it. Thanks, bye.</text><text x="36" y="296" class="t" style="animation:l8 16.0s infinite"><tspan class="a">AI   </tspan> Noted. Goodbye, Sir.</text><text x="36" y="326" class="t" style="animation:l9 16.0s infinite"><tspan class="d">[callme]</tspan> tool  take_note("fix test_offline")  <tspan class="ok">ok</tspan></text><text x="36" y="350" class="t" style="animation:l10 16.0s infinite"><tspan class="d">[callme]</tspan> call ended  0:42  summary sent to Telegram</text>
+<rect x="810" y="16" width="274" height="388" rx="36" fill="#0b1c22" stroke="#1f5563" stroke-width="2"/>
+<rect x="905" y="28" width="84" height="10" rx="5" fill="#05141a"/>
+<g style="animation:ring 16.0s infinite;opacity:0">
+  <circle cx="947" cy="170" r="34" fill="none" stroke="#5ef2ff" style="animation:pulse 1.1s infinite"/>
+  <circle cx="947" cy="170" r="34" fill="#103540" stroke="#5ef2ff"/>
+  <text x="947" y="178" text-anchor="middle" font-size="22" fill="#5ef2ff" font-weight="700">J</text>
+  <text x="947" y="240" text-anchor="middle" font-size="20" fill="#e8fbff">Jarvis</text>
+  <text x="947" y="264" text-anchor="middle" font-size="13" fill="#5d8a94">Telegram voice call…</text>
+  <circle cx="895" cy="340" r="22" fill="#e5484d"/><circle cx="999" cy="340" r="22" fill="#30c46c"/>
+</g>
+<g style="animation:live 16.0s infinite;opacity:0">
+  <circle cx="947" cy="150" r="34" fill="#103540" stroke="#5ef2ff"/>
+  <text x="947" y="158" text-anchor="middle" font-size="22" fill="#5ef2ff" font-weight="700">J</text>
+  <text x="947" y="220" text-anchor="middle" font-size="20" fill="#e8fbff">Jarvis</text>
+  <text x="947" y="244" text-anchor="middle" font-size="13" fill="#7dffa8">connected</text>
+  <rect x="895" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.5s 0.00s infinite ease-in-out"/><rect x="907" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.5700000000000001s 0.06s infinite ease-in-out"/><rect x="919" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.64s 0.12s infinite ease-in-out"/><rect x="931" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.71s 0.18s infinite ease-in-out"/><rect x="943" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.5s 0.24s infinite ease-in-out"/><rect x="955" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.5700000000000001s 0.30s infinite ease-in-out"/><rect x="967" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.64s 0.36s infinite ease-in-out"/><rect x="979" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.71s 0.42s infinite ease-in-out"/><rect x="991" y="300" width="6" height="40" rx="3" class="bar" style="animation:wave 0.5s 0.48s infinite ease-in-out"/>
+  <circle cx="947" cy="372" r="0" fill="#e5484d"/>
+</g>
+<g style="animation:end 16.0s infinite;opacity:0">
+  <text x="947" y="190" text-anchor="middle" font-size="18" fill="#e8fbff">Call ended</text>
+  <text x="947" y="216" text-anchor="middle" font-size="13" fill="#5d8a94">Summary sent ✓</text>
+</g>
+</svg>

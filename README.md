@@ -1,5 +1,7 @@
 # Jarvis Calls You 📞
 
+<p align="center"><img src="docs/demo.svg" alt="Illustration of a call: your app triggers it, your phone rings, the AI talks, notes are sent after." width="100%"></p>
+
 **An AI that phones you.** A real Telegram voice call, with a real-time voice (Gemini Live), that can talk, search the web, see your camera, take notes and call you back later.
 
 - ⏰ **Wake-up and check-in calls** on a schedule ("07:00 Mon-Fri: wake me up, weather + one good news story")
