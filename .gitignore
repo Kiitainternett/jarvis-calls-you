@@ -4,3 +4,6 @@ schedule.json
 __pycache__/
 *.session
 *.session-journal
+.venv/
+venv/
+.pytest_cache/

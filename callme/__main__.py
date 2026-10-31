@@ -47,6 +47,15 @@ def _check(s) -> None:
         print("✓ opencv (camera in calls)")
     except ImportError:
         print("• opencv not installed: calls work, camera images are skipped")
+    # Found testing the first-run experience: with a blank .env this used to print only "owner=" and a login hint,
+    # never saying which settings were still empty.
+    required = {"GEMINI_API_KEY": s.gemini_api_key, "TG_API_ID": s.tg_api_id, "TG_API_HASH": s.tg_api_hash, "OWNER": s.owner}
+    missing = [k for k, v in required.items() if not v]
+    if missing:
+        ok = False
+        print("✗ not filled in .env: " + ", ".join(missing))
+    else:
+        print("✓ .env has the required settings")
     print("✓ logged in" if s.session_path.with_suffix(".session").exists() else "✗ not logged in  →  python -m callme login")
     print(f"owner={s.owner} language={s.language} voice={s.voice} model={s.live_model}")
     print(f"quiet hours={s.quiet_hours} max calls/day={s.max_calls_per_day} webhook={'on' if s.webhook_token else 'off'}")

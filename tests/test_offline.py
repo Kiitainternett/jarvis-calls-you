@@ -123,6 +123,24 @@ def test_public_mode_limits_and_tools(tmp_path):
     assert svc.q.calls_today(datetime.now()) == 0  # public calls do not eat the owner's daily limit
 
 
+def test_check_names_the_missing_settings(tmp_path, capsys):
+    """First-run experience: a blank .env must say which settings are still empty."""
+    import pytest
+
+    from callme.__main__ import _check
+
+    s = config.Settings(gemini_api_key="", tg_api_id=0, tg_api_hash="", owner="", data_dir=tmp_path)
+    with pytest.raises(SystemExit) as e:
+        _check(s)
+    out = capsys.readouterr().out
+    assert e.value.code == 1
+    assert "not filled in .env: GEMINI_API_KEY, TG_API_ID, TG_API_HASH, OWNER" in out
+    s = config.Settings(gemini_api_key="x", tg_api_id=1, tg_api_hash="x", owner="1", data_dir=tmp_path)
+    with pytest.raises(SystemExit) as e:
+        _check(s)
+    assert "required settings" in capsys.readouterr().out and e.value.code == 0
+
+
 def test_live_config_without_search_tool(tmp_path):
     """Real bug 2026-10-31: google_search made the Live handshake fail with a fake 'quota' 1011; we retry without it."""
     from google.genai import types

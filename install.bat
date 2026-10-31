@@ -9,6 +9,7 @@ if not exist .env copy .env.example .env
 if not exist schedule.json copy schedule.example.json schedule.json
 echo.
 echo 1) Fill in .env  (notepad .env)
-echo 2) python -m callme login
-echo 3) run.bat
+echo 2) .venv\Scripts\python -m callme login
+echo 3) .venv\Scripts\python -m callme call "say hi"   (your phone rings)
+echo 4) run.bat   (keeps the service running, same as: python -m callme serve)
 pause
