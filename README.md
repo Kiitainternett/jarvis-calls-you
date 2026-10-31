@@ -25,6 +25,8 @@ The AI uses its **own** Telegram account (a spare number) and calls **you**. It 
 
 You need: [git](https://git-scm.com), Python 3.10+, a spare Telegram account for the AI, a free [Gemini API key](https://aistudio.google.com/apikey), and a free Telegram API id/hash from [my.telegram.org](https://my.telegram.org) (log in with the AI's number → API development tools).
 
+The installer puts everything in a virtual environment (`.venv`), so run the `python -m callme ...` commands inside it: activate it first (Windows: `.venv\Scripts\activate`, Linux/macOS: `source .venv/bin/activate`), or call its Python directly (`.venv\Scripts\python -m callme login`). Without it you get "No module named ..." errors. `run.bat` (Windows) does the same as `python -m callme serve`.
+
 ```bash
 git clone https://github.com/Kiitainternett/jarvis-calls-you && cd jarvis-calls-you
 ./install.sh            # Windows: install.bat
@@ -33,7 +35,6 @@ python -m callme login  # one time: log in the AI's Telegram account
 python -m callme call "say hi"   # your phone rings
 python -m callme serve  # run 24/7
 ```
-The installer puts everything in a virtual environment (`.venv`), so run the `python -m callme ...` commands inside it: activate it first (Windows: `.venv\Scripts\activate`, Linux/macOS: `source .venv/bin/activate`), or call its Python directly (`.venv\Scripts\python -m callme login`). Without it you get "No module named ..." errors. `run.bat` (Windows) does the same as `python -m callme serve`.
 
 Then send `help` to the AI's Telegram account from your own account.
 

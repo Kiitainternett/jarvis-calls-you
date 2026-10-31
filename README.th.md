@@ -13,10 +13,12 @@
 - 🔌 เพิ่มเครื่องมือของตัวเองได้ แค่วางไฟล์ Python ไว้ในโฟลเดอร์ tools/
 
 ## ติดตั้ง
+ตัวติดตั้งจะลงทุกอย่างไว้ใน `.venv` ดังนั้นคำสั่ง `python -m callme ...` ต้องรันในสภาพแวดล้อมนี้: เปิดด้วย `.venv\Scripts\activate` ก่อน (Mac/Linux: `source .venv/bin/activate`) หรือพิมพ์ `.venv\Scripts\python -m callme login` ไม่งั้นจะขึ้น "No module named ..."
+
 1. มี git, Python 3.10 ขึ้นไป, บัญชี Telegram สำรองสำหรับ AI, คีย์ Gemini ฟรี และ API ID ของ Telegram ฟรีจาก my.telegram.org
 2. ดับเบิลคลิก `install.bat` (บน Mac หรือ Linux ใช้ `./install.sh`)
 3. เปิดไฟล์ `.env` ใส่คีย์ แล้วตั้ง `LANGUAGE=th` กับ `OWNER=@ชื่อผู้ใช้ของคุณ`
-4. `python -m callme login` ล็อกอินบัญชี AI ครั้งเดียว (บน Windows ต้องรันในสภาพแวดล้อม `.venv`: เปิดด้วย `.venv\Scripts\activate` ก่อน หรือพิมพ์ `.venv\Scripts\python -m callme login` ไม่งั้นจะขึ้น "No module named ...")
+4. `python -m callme login` ล็อกอินบัญชี AI ครั้งเดียว
 5. ดับเบิลคลิก `run.bat` ให้ทำงานตลอด
 
 ## สั่งทางแชท
