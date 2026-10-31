@@ -179,3 +179,131 @@ def test_no_hang_up_before_caller_speaks(tmp_path, monkeypatch):
         return r1, r2, r3
     r1, r2, r3 = asyncio.run(go())
     assert "not" in r1.lower() and "not" in r2.lower() and r3 == "Hanging up."
+
+
+def _service_for_after_call(tmp_path, language="en"):
+    from callme.service import Service
+
+    s = config.Settings(gemini_api_key="x", tg_api_id=1, tg_api_hash="x", owner="1", data_dir=tmp_path, language=language)
+    svc = Service(s)
+    sent = []
+
+    async def send_owner(text):
+        sent.append(text)
+    svc.send_owner = send_owner
+    return svc, sent
+
+
+def _fake_genai(monkeypatch, replies):
+    """generate_content raises each Exception in replies and returns the first string."""
+    from google import genai
+
+    calls = []
+
+    class Models:
+        def generate_content(self, **_):
+            calls.append(1)
+            item = replies[len(calls) - 1]
+            if isinstance(item, Exception):
+                raise item
+            return type("R", (), {"text": item})()
+
+    class Client:
+        def __init__(self, **_):
+            self.models = Models()
+    monkeypatch.setattr(genai, "Client", Client)
+    return calls
+
+
+def test_failed_summary_still_sends_post_call_message(tmp_path, monkeypatch):
+    """Real bug 2026-10-31: a 503 on the summary request meant no post-call message at all."""
+    import asyncio
+
+    from callme import service
+
+    monkeypatch.setattr(service, "SUMMARY_RETRY_DELAY_S", 0)
+    calls = _fake_genai(monkeypatch, [Exception("503"), Exception("503")])
+    svc, sent = _service_for_after_call(tmp_path, "th")
+    r = {"result": "connected", "seconds": 46, "notes": ["buy milk"], "lines": ["a", "b"]}
+    asyncio.run(svc.after_call("test", r))
+    assert len(calls) == 2  # tried once more before giving up
+    assert len(sent) == 1 and "0:46" in sent[0] and "buy milk" in sent[0] and "สรุปไม่สำเร็จ" in sent[0]
+
+
+def test_summary_retry_recovers(tmp_path, monkeypatch):
+    import asyncio
+
+    from callme import service
+
+    monkeypatch.setattr(service, "SUMMARY_RETRY_DELAY_S", 0)
+    calls = _fake_genai(monkeypatch, [Exception("503"), "- all good"])
+    svc, sent = _service_for_after_call(tmp_path)
+    asyncio.run(svc.after_call("test", {"result": "connected", "seconds": 5, "lines": ["a", "b"]}))
+    assert len(calls) == 2 and "all good" in sent[0] and "failed" not in sent[0]
+
+
+def test_short_call_needs_no_summary_message(tmp_path, monkeypatch):
+    import asyncio
+
+    calls = _fake_genai(monkeypatch, [])
+    svc, sent = _service_for_after_call(tmp_path)
+    asyncio.run(svc.after_call("test", {"result": "connected", "seconds": 2, "lines": ["a"]}))
+    assert calls == [] and sent == []
+
+
+def _run_call_with_fake_service(tmp_path, body):
+    """Run `python -m callme call` for real in a child process, with Telegram replaced by a fake Service."""
+    import subprocess
+    import sys
+
+    script = f"""
+import sys, threading, time
+from callme import service
+{body}
+service.Service.connect = connect
+service.Service.place = place
+service.Service.after_call = after_call
+sys.argv = ["callme", "call", "test"]
+from callme.__main__ import main
+main()
+"""
+    env = dict(os.environ, CALLME_HOME=str(tmp_path), GEMINI_API_KEY="x", TG_API_ID="1", TG_API_HASH="x", OWNER="1")
+    return subprocess.run([sys.executable, "-c", script], env=env, capture_output=True, text=True, timeout=60,
+                          cwd=str(Path(__file__).resolve().parent.parent))
+
+
+FAKE_STUCK_LIBRARY = """
+class Client:
+    disconnected = False
+    async def disconnect(self):
+        print("disconnected", flush=True)
+async def connect(self):
+    self.client = Client()
+    # like the PyTgCalls thread pool: a non-daemon thread nobody can stop
+    threading.Thread(target=lambda: time.sleep(600), daemon=False).start()
+async def after_call(self, reason, r):
+    pass
+"""
+
+
+def test_call_exits_cleanly_after_hang_up(tmp_path):
+    """Real bug 2026-10-31: `callme call` never exited after hanging up. The timeout fails this test if it hangs."""
+    r = _run_call_with_fake_service(tmp_path, FAKE_STUCK_LIBRARY + """
+async def place(self, reason):
+    return {"result": "connected"}
+""")
+    assert r.returncode == 0, r.stderr
+    assert "result: connected" in r.stdout and "disconnected" in r.stdout
+
+
+def test_call_exit_code_when_not_connected_or_crashed(tmp_path):
+    r = _run_call_with_fake_service(tmp_path, FAKE_STUCK_LIBRARY + """
+async def place(self, reason):
+    return {"result": "no_answer"}
+""")
+    assert r.returncode == 1 and "result: no_answer" in r.stdout and "disconnected" in r.stdout
+    r = _run_call_with_fake_service(tmp_path, FAKE_STUCK_LIBRARY + """
+async def place(self, reason):
+    raise RuntimeError("boom")
+""")
+    assert r.returncode == 1 and "call failed: RuntimeError: boom" in r.stdout and "disconnected" in r.stdout

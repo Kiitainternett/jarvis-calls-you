@@ -36,6 +36,8 @@ python -m callme call "say hi"   # your phone rings
 python -m callme serve  # run 24/7
 ```
 
+**Logging in:** type the code yourself in the terminal. Never forward it or paste it into any chat, even your own: Telegram treats a shared code as stolen and blocks the login. We also recommend turning on Two-Step Verification on the AI's account (Telegram: Settings > Privacy and Security); `login` will then ask for that password too.
+
 Then send `help` to the AI's Telegram account from your own account.
 
 ## Talk to it in Telegram chat

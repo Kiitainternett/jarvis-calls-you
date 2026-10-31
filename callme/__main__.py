@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import logging
+import os
 import sys
 
 from . import config
@@ -19,6 +20,15 @@ async def _login(s) -> None:
     await client.disconnect()
 
 
+def _exit_now(code: int) -> None:
+    # Real first-run test 2026-10-31: `callme call` hung forever after hanging up, because PyTgCalls keeps a
+    # non-daemon thread pool that it has no way to stop, and Python waits for those threads at normal exit.
+    sys.stdout.flush()
+    sys.stderr.flush()
+    logging.shutdown()
+    os._exit(code)
+
+
 async def _call(s, reason: str) -> None:
     from . import tools
     from .service import Service
@@ -26,10 +36,18 @@ async def _call(s, reason: str) -> None:
     tools.load_plugins(s.tools_dir)
     svc = Service(s)
     await svc.connect()
-    r = await svc.place(reason)
-    print("result:", r["result"], r.get("error", ""))
-    await svc.after_call(reason, r)
-    await svc.client.disconnect()
+    code = 1
+    try:
+        r = await svc.place(reason)
+        print("result:", r["result"], r.get("error", ""))
+        await svc.after_call(reason, r)
+        code = 0 if r["result"] == "connected" else 1
+    except Exception as e:  # noqa: BLE001 — still has to reach the exit below, or the process hangs
+        logging.exception("call failed")
+        print(f"call failed: {type(e).__name__}: {e}")
+    finally:
+        await svc.close()
+    _exit_now(code)
 
 
 def _check(s) -> None:

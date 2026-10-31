@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
@@ -16,6 +17,9 @@ from .scheduler import Queue, in_quiet, load_routines, parse_command, parse_when
 
 RING_TIMEOUT_S = 45
 MAX_AUDIO_RETRIES = 3
+SUMMARY_ATTEMPTS = 2
+SUMMARY_RETRY_DELAY_S = 5
+CLOSE_TIMEOUT_S = 5
 
 HELP = {
     "en": ("Commands (send to me here):\n"
@@ -270,10 +274,27 @@ class Service:
         if r.get("notes"):
             parts.append("📝 " + "\n📝 ".join(r["notes"]))
         summary = await asyncio.to_thread(summarize, self.s, r.get("lines", []))
-        if summary:
+        if summary is None:
+            parts.append("⚠️ สรุปไม่สำเร็จ" if self.s.language == "th" else "⚠️ Summary failed")
+        elif summary:
             parts.append(summary)
         if len(parts) > 1:
             await self.send_owner("\n\n".join(parts))
+
+    async def close(self) -> None:
+        """Stop what this service started, without letting a stuck task or a dead connection block the exit."""
+        for b in self.active.values():
+            b.ended.set()
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        for t in tasks:
+            t.cancel()
+        if tasks:
+            await asyncio.wait(tasks, timeout=CLOSE_TIMEOUT_S)
+        if self.client:
+            try:
+                await asyncio.wait_for(self.client.disconnect(), CLOSE_TIMEOUT_S)
+            except Exception:  # noqa: BLE001 — we are exiting either way
+                logging.exception("disconnect failed")
 
     # ---------------------------------------------------------------- scheduler loop
     async def tick(self) -> None:
@@ -321,18 +342,23 @@ class Service:
             await asyncio.sleep(5)
 
 
-def summarize(s: Settings, lines: list[str]) -> str:
+def summarize(s: Settings, lines: list[str]) -> str | None:
+    """The summary text, "" if the call was too short to need one, None if every attempt failed."""
     if len(lines) < 2:
         return ""
-    try:
-        from google import genai
+    # Real first-run test 2026-10-31: a 503 on this request lost the whole post-call message.
+    for attempt in range(SUMMARY_ATTEMPTS):
+        if attempt:
+            time.sleep(SUMMARY_RETRY_DELAY_S)
+        try:
+            from google import genai
 
-        client = genai.Client(api_key=s.gemini_api_key)
-        r = client.models.generate_content(
-            model=s.text_model,
-            contents=f"Summarize this phone call in {s.language_name} in 1-3 short bullet points: decisions, "
-                     "to-dos, numbers. Transcript:\n" + "\n".join(lines[-80:]))
-        return (r.text or "").strip()
-    except Exception:  # noqa: BLE001 — a summary is a bonus, never fail the call flow for it
-        logging.exception("summary failed")
-        return ""
+            client = genai.Client(api_key=s.gemini_api_key)
+            r = client.models.generate_content(
+                model=s.text_model,
+                contents=f"Summarize this phone call in {s.language_name} in 1-3 short bullet points: decisions, "
+                         "to-dos, numbers. Transcript:\n" + "\n".join(lines[-80:]))
+            return (r.text or "").strip()
+        except Exception:  # noqa: BLE001 — a summary is a bonus, never fail the call flow for it
+            logging.exception("summary failed (attempt %d of %d)", attempt + 1, SUMMARY_ATTEMPTS)
+    return None

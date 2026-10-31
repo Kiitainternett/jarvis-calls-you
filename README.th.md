@@ -18,7 +18,7 @@
 1. มี git, Python 3.10 ขึ้นไป, บัญชี Telegram สำรองสำหรับ AI, คีย์ Gemini ฟรี และ API ID ของ Telegram ฟรีจาก my.telegram.org
 2. ดับเบิลคลิก `install.bat` (บน Mac หรือ Linux ใช้ `./install.sh`)
 3. เปิดไฟล์ `.env` ใส่คีย์ แล้วตั้ง `LANGUAGE=th` กับ `OWNER=@ชื่อผู้ใช้ของคุณ`
-4. `python -m callme login` ล็อกอินบัญชี AI ครั้งเดียว
+4. `python -m callme login` ล็อกอินบัญชี AI ครั้งเดียว **พิมพ์รหัสเองในหน้าต่างนี้เท่านั้น** ห้ามส่งต่อหรือวางรหัสในแชตไหน แม้แต่แชตของตัวเอง ไม่งั้น Telegram จะมองว่ารหัสถูกขโมยและบล็อกการล็อกอิน แนะนำให้เปิดรหัสผ่าน 2 ชั้น (Two-Step Verification) ของบัญชี AI ด้วย (Telegram: Settings > Privacy and Security) ตอนล็อกอินจะถามรหัสนั้นเพิ่ม
 5. ดับเบิลคลิก `run.bat` ให้ทำงานตลอด
 
 ## สั่งทางแชท
